@@ -51,7 +51,7 @@ class Application(dbus.service.Object):
         dbus.service.Object.__init__(self, bus, self.path)
         self.add_service(HeartRateService(bus, 0))
         self.add_service(BatteryService(bus, 1))
-        self.add_service(TestService(bus, 2))
+        self.add_service(WifiConfigService(bus, 2))
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
@@ -429,59 +429,59 @@ class BatteryLevelCharacteristic(Characteristic):
         self.notifying = False
 
 
-class TestService(Service):
+class WifiConfigService(Service):
     """
-    Dummy test service that provides characteristics and descriptors that
-    exercise various API functionality.
+    Wifi Config service that provides characteristics and descriptors for
+    raspbian wifi config.
 
     """
-    TEST_SVC_UUID = '12345678-1234-5678-1234-56789abcdef0'
+    WIFI_SVC_UUID = '12345678-1234-5678-1234-56789abcdef0'
 
     def __init__(self, bus, index):
-        Service.__init__(self, bus, index, self.TEST_SVC_UUID, True)
-        self.add_characteristic(TestCharacteristic(bus, 0, self))
-        self.add_characteristic(TestEncryptCharacteristic(bus, 1, self))
-        self.add_characteristic(TestSecureCharacteristic(bus, 2, self))
+        Service.__init__(self, bus, index, self.WIFI_SVC_UUID, True)
+        self.add_characteristic(WifiCharacteristic(bus, 0, self))
+        self.add_characteristic(WifiEncryptCharacteristic(bus, 1, self))
+        self.add_characteristic(WifiSecureCharacteristic(bus, 2, self))
 
-class TestCharacteristic(Characteristic):
+class WifiCharacteristic(Characteristic):
     """
-    Dummy test characteristic. Allows writing arbitrary bytes to its value, and
+    Wifi config characteristic. Allows writing arbitrary bytes to its value, and
     contains "extended properties", as well as a test descriptor.
 
     """
-    TEST_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef1'
+    WIFI_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef1'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
                 self, bus, index,
-                self.TEST_CHRC_UUID,
+                self.WIFI_CHRC_UUID,
                 ['read', 'write', 'writable-auxiliaries'],
                 service)
         self.value = []
-        self.add_descriptor(TestDescriptor(bus, 0, self))
+        self.add_descriptor(WifiDescriptor(bus, 0, self))
         self.add_descriptor(
                 CharacteristicUserDescriptionDescriptor(bus, 1, self))
 
     def ReadValue(self, options):
-        print('TestCharacteristic Read: ' + repr(self.value))
+        print('WifiCharacteristic Read: ' + repr(self.value))
         return self.value
 
     def WriteValue(self, value, options):
-        print('TestCharacteristic Write: ' + repr(value))
+        print('WifiCharacteristic Write: ' + repr(value))
         self.value = value
 
 
-class TestDescriptor(Descriptor):
+class WifiDescriptor(Descriptor):
     """
-    Dummy test descriptor. Returns a static value.
+    Wifi descriptor. Returns a static value.
 
     """
-    TEST_DESC_UUID = '12345678-1234-5678-1234-56789abcdef2'
+    WIFI_DESC_UUID = '12345678-1234-5678-1234-56789abcdef2'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
                 self, bus, index,
-                self.TEST_DESC_UUID,
+                self.WIFI_DESC_UUID,
                 ['read', 'write'],
                 characteristic)
 
@@ -516,43 +516,43 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
             raise NotPermittedException()
         self.value = value
 
-class TestEncryptCharacteristic(Characteristic):
+class WifiEncryptCharacteristic(Characteristic):
     """
-    Dummy test characteristic requiring encryption.
+    Wifi password characteristic requiring encryption.
 
     """
-    TEST_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef3'
+    WIFI_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef3'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
                 self, bus, index,
-                self.TEST_CHRC_UUID,
+                self.WIFI_CHRC_UUID,
                 ['encrypt-read', 'encrypt-write'],
                 service)
         self.value = []
-        self.add_descriptor(TestEncryptDescriptor(bus, 2, self))
+        self.add_descriptor(WifiEncryptDescriptor(bus, 2, self))
         self.add_descriptor(
                 CharacteristicUserDescriptionDescriptor(bus, 3, self))
 
     def ReadValue(self, options):
-        print('TestEncryptCharacteristic Read: ' + repr(self.value))
+        print('WifiEncryptCharacteristic Read: ' + repr(self.value))
         return self.value
 
     def WriteValue(self, value, options):
-        print('TestEncryptCharacteristic Write: ' + repr(value))
+        print('WifiEncryptCharacteristic Write: ' + repr(value))
         self.value = value
 
-class TestEncryptDescriptor(Descriptor):
+class WifiEncryptDescriptor(Descriptor):
     """
-    Dummy test descriptor requiring encryption. Returns a static value.
+    Wifi descriptor requiring encryption. Returns a static value.
 
     """
-    TEST_DESC_UUID = '12345678-1234-5678-1234-56789abcdef4'
+    WIFI_DESC_UUID = '12345678-1234-5678-1234-56789abcdef4'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
                 self, bus, index,
-                self.TEST_DESC_UUID,
+                self.WIFI_DESC_UUID,
                 ['encrypt-read', 'encrypt-write'],
                 characteristic)
 
@@ -562,44 +562,44 @@ class TestEncryptDescriptor(Descriptor):
         ]
 
 
-class TestSecureCharacteristic(Characteristic):
+class WifiSecureCharacteristic(Characteristic):
     """
-    Dummy test characteristic requiring secure connection.
+    Wifi characteristic requiring secure connection.
 
     """
-    TEST_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef5'
+    WIFI_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef5'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
                 self, bus, index,
-                self.TEST_CHRC_UUID,
+                self.WIFI_CHRC_UUID,
                 ['secure-read', 'secure-write'],
                 service)
         self.value = []
-        self.add_descriptor(TestSecureDescriptor(bus, 2, self))
+        self.add_descriptor(WifiSecureDescriptor(bus, 2, self))
         self.add_descriptor(
                 CharacteristicUserDescriptionDescriptor(bus, 3, self))
 
     def ReadValue(self, options):
-        print('TestSecureCharacteristic Read: ' + repr(self.value))
+        print('WifiSecureCharacteristic Read: ' + repr(self.value))
         return self.value
 
     def WriteValue(self, value, options):
-        print('TestSecureCharacteristic Write: ' + repr(value))
+        print('WifiSecureCharacteristic Write: ' + repr(value))
         self.value = value
 
 
-class TestSecureDescriptor(Descriptor):
+class WifiSecureDescriptor(Descriptor):
     """
-    Dummy test descriptor requiring secure connection. Returns a static value.
+    Wifi descriptor requiring secure connection. Returns a static value.
 
     """
-    TEST_DESC_UUID = '12345678-1234-5678-1234-56789abcdef6'
+    WIFI_DESC_UUID = '12345678-1234-5678-1234-56789abcdef6'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
                 self, bus, index,
-                self.TEST_DESC_UUID,
+                self.WIFI_DESC_UUID,
                 ['secure-read', 'secure-write'],
                 characteristic)
 
