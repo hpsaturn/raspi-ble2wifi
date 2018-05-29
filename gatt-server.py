@@ -49,7 +49,7 @@ class Application(dbus.service.Object):
         self.path = '/'
         self.services = []
         dbus.service.Object.__init__(self, bus, self.path)
-        self.add_service(WifiConfigService(bus, 2))
+        self.add_service(WifiConfigService(bus, 0))
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
