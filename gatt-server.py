@@ -277,12 +277,30 @@ class WifiCharacteristic(Characteristic):
                 service)
         self.value = []
         self.add_descriptor(WifiDescriptor(bus, 0, self))
-        self.add_descriptor(
-                CharacteristicUserDescriptionDescriptor(bus, 1, self))
+        self.add_descriptor(CharacteristicUserDescriptionDescriptor(bus, 1, self))
+        self.notifying = False
+        self.battery_lvl = 100
+        GObject.timeout_add(5000, self.drain_battery)
+
+    def notify_battery_level(self):
+        if not self.notifying:
+            return
+        self.PropertiesChanged(
+                GATT_CHRC_IFACE,
+                { 'Value': [dbus.Byte(self.battery_lvl)] }, [])
+
+    def drain_battery(self):
+        if self.battery_lvl > 0:
+            self.battery_lvl -= 2
+            if self.battery_lvl < 0:
+                self.battery_lvl = 0
+        print('Battery Level drained: ' + repr(self.battery_lvl))
+        self.notify_battery_level()
+        return True
 
     def ReadValue(self, options):
-        print('WifiCharacteristic Read: ' + repr(self.value))
-        return self.value
+        print('Battery Level read: ' + repr(self.battery_lvl))
+        return [dbus.Byte(self.battery_lvl)]
 
     def WriteValue(self, value, options):
         print('WifiCharacteristic Write: ' + repr(value))
@@ -294,6 +312,7 @@ class WifiCharacteristic(Characteristic):
             return
 
         self.notifying = True
+        self.notify_battery_level()
 
     def StopNotify(self):
         if not self.notifying:
