@@ -259,6 +259,7 @@ class WifiConfigService(Service):
         self.add_characteristic(WifiCharacteristic(bus, 0, self))
         self.add_characteristic(WifiEncryptCharacteristic(bus, 1, self))
         self.add_characteristic(WifiSecureCharacteristic(bus, 2, self))
+        self.energy_expended = 0
 
 class WifiCharacteristic(Characteristic):
     """
@@ -272,7 +273,7 @@ class WifiCharacteristic(Characteristic):
         Characteristic.__init__(
                 self, bus, index,
                 self.WIFI_CHRC_UUID,
-                ['read', 'write', 'writable-auxiliaries'],
+                ['notify','read', 'write', 'writable-auxiliaries'],
                 service)
         self.value = []
         self.add_descriptor(WifiDescriptor(bus, 0, self))
