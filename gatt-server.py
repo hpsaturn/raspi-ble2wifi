@@ -287,6 +287,20 @@ class WifiCharacteristic(Characteristic):
         print('WifiCharacteristic Write: ' + repr(value))
         self.value = value
 
+    def StartNotify(self):
+        if self.notifying:
+            print('Already notifying, nothing to do')
+            return
+
+        self.notifying = True
+
+    def StopNotify(self):
+        if not self.notifying:
+            print('Not notifying, nothing to do')
+            return
+
+        self.notifying = False
+
 
 class WifiDescriptor(Descriptor):
     """
