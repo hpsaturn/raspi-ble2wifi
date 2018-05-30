@@ -336,7 +336,7 @@ class WifiEncryptCharacteristic(Characteristic):
     Wifi password characteristic requiring encryption.
 
     """
-    WIFI_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef3'
+    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef3'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -362,7 +362,7 @@ class WifiEncryptDescriptor(Descriptor):
     Wifi descriptor requiring encryption. Returns a static value.
 
     """
-    WIFI_DESC_UUID = '12345678-1234-5678-1234-56789abcdef4'
+    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef4'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
@@ -382,7 +382,7 @@ class WifiSecureCharacteristic(Characteristic):
     Wifi characteristic requiring secure connection.
 
     """
-    WIFI_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef5'
+    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef5'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -409,7 +409,7 @@ class WifiSecureDescriptor(Descriptor):
     Wifi descriptor requiring secure connection. Returns a static value.
 
     """
-    WIFI_DESC_UUID = '12345678-1234-5678-1234-56789abcdef6'
+    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef6'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
