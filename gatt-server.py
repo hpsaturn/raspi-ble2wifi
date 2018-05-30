@@ -252,7 +252,7 @@ class WifiConfigService(Service):
     raspbian wifi config.
 
     """
-    WIFI_SVC_UUID = '12345678-1234-5678-1234-56789abcdef0'
+    WIFI_SVC_UUID = '181c5678-1234-5678-1234-56789abcdef0'
 
     def __init__(self, bus, index):
         Service.__init__(self, bus, index, self.WIFI_SVC_UUID, True)
@@ -266,7 +266,7 @@ class WifiCharacteristic(Characteristic):
     contains "extended properties", as well as a test descriptor.
 
     """
-    WIFI_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef1'
+    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef1'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -291,7 +291,7 @@ class WifiDescriptor(Descriptor):
     Wifi descriptor. Returns a static value.
 
     """
-    WIFI_DESC_UUID = '12345678-1234-5678-1234-56789abcdef2'
+    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef2'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
@@ -311,7 +311,7 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
     Writable CUD descriptor.
 
     """
-    CUD_UUID = '2901'
+    CUD_UUID = '181c'
 
     def __init__(self, bus, index, characteristic):
         self.writable = 'writable-auxiliaries' in characteristic.flags
