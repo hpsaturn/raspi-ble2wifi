@@ -50,7 +50,6 @@ class Application(dbus.service.Object):
         return response
 
 
-
 class WifiConfigService(Service):
     """
     Wifi Config service that provides characteristics and descriptors for
@@ -61,54 +60,7 @@ class WifiConfigService(Service):
 
     def __init__(self, bus, index):
         Service.__init__(self, bus, index, self.WIFI_SVC_UUID, True)
-        self.add_characteristic(WifiCharacteristic(bus, 0, self))
-        self.add_characteristic(WifiEncryptCharacteristic(bus, 1, self))
-        self.add_characteristic(WifiSecureCharacteristic(bus, 2, self))
-
-class WifiCharacteristic(Characteristic):
-    """
-    Wifi config characteristic. Allows writing arbitrary bytes to its value, and
-    contains "extended properties", as well as a test descriptor.
-
-    """
-    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef1'
-
-    def __init__(self, bus, index, service):
-        Characteristic.__init__(
-                self, bus, index,
-                self.WIFI_CHRC_UUID,
-                ['read', 'write', 'writable-auxiliaries'],
-                service)
-        self.value = []
-        self.add_descriptor(WifiDescriptor(bus, 0, self))
-        self.add_descriptor(CharacteristicUserDescriptionDescriptor(bus, 1, self))
-
-    def ReadValue(self, options):
-        print('WifiCharacteristic Write: ' + repr(self.value))
-        return [dbus.Byte(self.value)]
-
-    def WriteValue(self, value, options):
-        print('WifiCharacteristic Write: ' + repr(value))
-        self.value = value
-
-class WifiDescriptor(Descriptor):
-    """
-    Wifi descriptor. Returns a static value.
-
-    """
-    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef2'
-
-    def __init__(self, bus, index, characteristic):
-        Descriptor.__init__(
-                self, bus, index,
-                self.WIFI_DESC_UUID,
-                ['read', 'write'],
-                characteristic)
-
-    def ReadValue(self, options):
-        return [
-                dbus.Byte('T'), dbus.Byte('e'), dbus.Byte('s'), dbus.Byte('t')
-        ]
+        self.add_characteristic(WifiSecureCharacteristic(bus, 0, self))
 
 
 class CharacteristicUserDescriptionDescriptor(Descriptor):
@@ -120,7 +72,7 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
 
     def __init__(self, bus, index, characteristic):
         self.writable = 'writable-auxiliaries' in characteristic.flags
-        self.value = array.array('B', b'Wifi config characteristic')
+        self.value = array.array('B', b'Raspi BLE2WiFi https://github.com/hpsaturn/raspi-ble2wifi')
         self.value = self.value.tolist()
         Descriptor.__init__(
                 self, bus, index,
@@ -129,57 +81,13 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
                 characteristic)
 
     def ReadValue(self, options):
+        print('Read CharacteristicUserDescriptionDescriptor')
         return self.value
 
     def WriteValue(self, value, options):
         if not self.writable:
             raise NotPermittedException()
         self.value = value
-
-class WifiEncryptCharacteristic(Characteristic):
-    """
-    Wifi password characteristic requiring encryption.
-
-    """
-    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef3'
-
-    def __init__(self, bus, index, service):
-        Characteristic.__init__(
-                self, bus, index,
-                self.WIFI_CHRC_UUID,
-                ['encrypt-read', 'encrypt-write'],
-                service)
-        self.value = []
-        self.add_descriptor(WifiEncryptDescriptor(bus, 2, self))
-        self.add_descriptor(
-                CharacteristicUserDescriptionDescriptor(bus, 3, self))
-
-    def ReadValue(self, options):
-        print('WifiEncryptCharacteristic Read: ' + repr(self.value))
-        return self.value
-
-    def WriteValue(self, value, options):
-        print('WifiEncryptCharacteristic Write: ' + repr(value))
-        self.value = value
-
-class WifiEncryptDescriptor(Descriptor):
-    """
-    Wifi descriptor requiring encryption. Returns a static value.
-
-    """
-    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef4'
-
-    def __init__(self, bus, index, characteristic):
-        Descriptor.__init__(
-                self, bus, index,
-                self.WIFI_DESC_UUID,
-                ['encrypt-read', 'encrypt-write'],
-                characteristic)
-
-    def ReadValue(self, options):
-        return [
-                dbus.Byte('T'), dbus.Byte('e'), dbus.Byte('s'), dbus.Byte('t')
-        ]
 
 
 class WifiSecureCharacteristic(Characteristic):
@@ -197,8 +105,7 @@ class WifiSecureCharacteristic(Characteristic):
                 service)
         self.value = []
         self.add_descriptor(WifiSecureDescriptor(bus, 2, self))
-        self.add_descriptor(
-                CharacteristicUserDescriptionDescriptor(bus, 3, self))
+        self.add_descriptor(CharacteristicUserDescriptionDescriptor(bus, 3, self))
 
     def ReadValue(self, options):
         print('WifiSecureCharacteristic Read: ' + repr(self.value))
@@ -222,11 +129,16 @@ class WifiSecureDescriptor(Descriptor):
                 self.WIFI_DESC_UUID,
                 ['secure-read', 'secure-write'],
                 characteristic)
+        self.value = []
 
     def ReadValue(self, options):
-        return [
-                dbus.Byte('T'), dbus.Byte('e'), dbus.Byte('s'), dbus.Byte('t')
-        ]
+        print('WifiSecureCharacteristic Read: ' + repr(self.value))
+        return self.value
+
+    def WriteValue(self, value, options):
+        print('WifiSecureCharacteristic Write: ' + repr(value))
+        self.value = value
+
 
 def register_app_cb():
     print('GATT application registered')
