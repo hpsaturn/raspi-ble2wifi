@@ -14,6 +14,7 @@ except ImportError:
 
 import sys
 from gatt import *
+from wifi import Cell, Scheme
 
 mainloop = None
 
@@ -160,6 +161,11 @@ def find_adapter(bus):
 
     return None
 
+def wifi_scan_ssids(device):
+    ssids = [cell.ssid for cell in Cell.all(device)]
+    print (ssids)
+
+
 def main():
     global mainloop
 
@@ -179,6 +185,8 @@ def main():
     app = Application(bus)
 
     mainloop = GObject.MainLoop()
+
+    wifi_scan_ssids('wlan0')
 
     print('Registering GATT application...')
 
