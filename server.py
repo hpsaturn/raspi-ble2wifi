@@ -6,13 +6,13 @@ import dbus.mainloop.glib
 import dbus.service
 
 import array
+import sys
 
 try:
   from gi.repository import GObject
 except ImportError:
   import gobject as GObject
 
-import sys
 from gatt import *
 from wifi import Cell, Scheme
 
@@ -168,19 +168,21 @@ class WifiScanningChrc(Characteristic):
         #value = []
         #value.append(len(wifi_scan_ssids('wlan0')))
         first_ssid=wifi_scan_ssids('wlan0')[0]
-        b = bytearray()
-        self.value = array.array('B', b.extend(first_ssid.encode()))
+        print('first ssid: ' + repr(first_ssid))
+        self.value = array.array('B',bytes(first_ssid, encoding='utf-8'))
         self.value = self.value.tolist()
-        print('ssids: ' + repr(self.value))
+        print('ssids bytes: ' + repr(self.value))
         self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': self.value }, [])
         return self.notifying
 
     def _update_hr_msrmt_simulation(self):
-        print('Scanning wifi networks..')
+        print('Updating scanning wifi service..',end='')
 
         if not self.notifying:
+            print ('disabling service')
             return
 
+        print ('enabling service')
         GObject.timeout_add(5000, self.hr_msrmt_cb)
 
     def StartNotify(self):
