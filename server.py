@@ -26,7 +26,8 @@ class Application(dbus.service.Object):
         self.path = '/'
         self.services = []
         dbus.service.Object.__init__(self, bus, self.path)
-        self.add_service(WifiConfigService(bus, 0))
+        self.add_service(WifiScanningService(bus, 0))
+        self.add_service(WifiConfigService(bus, 1))
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
@@ -96,7 +97,7 @@ class WifiSecureCharacteristic(Characteristic):
     Wifi characteristic requiring secure connection.
 
     """
-    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef5'
+    WIFI_CHRC_UUID = '181c5678-1234-5678-1234-56789abcdef1'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -122,7 +123,7 @@ class WifiSecureDescriptor(Descriptor):
     Wifi descriptor requiring secure connection. Returns a static value.
 
     """
-    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef6'
+    WIFI_DESC_UUID = '181c5678-1234-5678-1234-56789abcdef2'
 
     def __init__(self, bus, index, characteristic):
         Descriptor.__init__(
@@ -144,17 +145,15 @@ class WifiScanningService(Service):
     """
     Scanning ssid near to raspberryPi
     """
-    HR_UUID = '0000180d-0000-1000-8000-00805f9b34fb'
+    HR_UUID = '181c5678-1234-5678-1234-56789abcdef3'
 
     def __init__(self, bus, index):
         Service.__init__(self, bus, index, self.HR_UUID, True)
         self.add_characteristic(WifiScanningChrc(bus, 0, self))
-        self.add_characteristic(BodySensorLocationChrc(bus, 1, self))
-        self.add_characteristic(HeartRateControlPointChrc(bus, 2, self))
         self.energy_expended = 0
 
 class WifiScanningChrc(Characteristic):
-    HR_MSRMT_UUID = '00002a37-0000-1000-8000-00805f9b34fb'
+    HR_MSRMT_UUID = '181c5678-1234-5678-1234-56789abcdef4'
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -167,23 +166,9 @@ class WifiScanningChrc(Characteristic):
 
     def hr_msrmt_cb(self):
         value = []
-        value.append(dbus.Byte(0x06))
-
-        value.append(dbus.Byte(randint(90, 130)))
-
-        if self.hr_ee_count % 10 == 0:
-            value[0] = dbus.Byte(value[0] | 0x08)
-            value.append(dbus.Byte(self.service.energy_expended & 0xff))
-            value.append(dbus.Byte((self.service.energy_expended >> 8) & 0xff))
-
-        self.service.energy_expended = \
-                min(0xffff, self.service.energy_expended + 1)
-        self.hr_ee_count += 1
-
+        value.append(len(wifi_scan_ssids('wlan0')))
         print('Updating value: ' + repr(value))
-
         self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': value }, [])
-
         return self.notifying
 
     def _update_hr_msrmt_simulation(self):
@@ -192,7 +177,7 @@ class WifiScanningChrc(Characteristic):
         if not self.notifying:
             return
 
-        GObject.timeout_add(1000, self.hr_msrmt_cb)
+        GObject.timeout_add(5000, self.hr_msrmt_cb)
 
     def StartNotify(self):
         if self.notifying:
@@ -233,8 +218,7 @@ def find_adapter(bus):
 
 def wifi_scan_ssids(device):
     ssids = [cell.ssid for cell in Cell.all(device)]
-    print (ssids)
-
+    return ssids
 
 def main():
     global mainloop
@@ -255,8 +239,6 @@ def main():
     app = Application(bus)
 
     mainloop = GObject.MainLoop()
-
-    wifi_scan_ssids('wlan0')
 
     print('Registering GATT application...')
 
