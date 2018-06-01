@@ -165,14 +165,18 @@ class WifiScanningChrc(Characteristic):
         self.hr_ee_count = 0
 
     def hr_msrmt_cb(self):
-        value = []
-        value.append(len(wifi_scan_ssids('wlan0')))
-        print('Updating value: ' + repr(value))
-        self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': value }, [])
+        #value = []
+        #value.append(len(wifi_scan_ssids('wlan0')))
+        first_ssid=wifi_scan_ssids('wlan0')[0]
+        b = bytearray()
+        self.value = array.array('B', b.extend(first_ssid.encode()))
+        self.value = self.value.tolist()
+        print('ssids: ' + repr(self.value))
+        self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': self.value }, [])
         return self.notifying
 
     def _update_hr_msrmt_simulation(self):
-        print('Update HR Measurement Simulation')
+        print('Scanning wifi networks..')
 
         if not self.notifying:
             return
